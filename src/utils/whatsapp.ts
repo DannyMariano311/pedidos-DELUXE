@@ -18,6 +18,9 @@ export function buildOrderMessage(
   for (const item of items) {
     const lineTotal = item.product.price * item.quantity
     lines.push(`• ${item.quantity}x ${item.product.name} — ${formatPrice(lineTotal)}`)
+    if (item.comment.trim()) {
+      lines.push(`   ↳ ${item.comment.trim()}`)
+    }
   }
 
   lines.push('')
@@ -37,7 +40,7 @@ export function buildOrderMessage(
 
   if (delivery.comments.trim()) {
     lines.push('')
-    lines.push(`${WA.speech} *Comentarios:* ${delivery.comments}`)
+    lines.push(`${WA.speech} *Comentarios del pedido:* ${delivery.comments}`)
   }
 
   return lines.join('\n')

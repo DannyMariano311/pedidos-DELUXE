@@ -9,6 +9,8 @@ npm install
 npm run dev
 ```
 
+En desarrollo, Vite usa un proxy (`/api/menu`) hacia el Worker de menú para evitar errores de CORS en `localhost`. En producción la app llama directamente al Worker (el origen `pedidos-deluxe` ya está permitido).
+
 ## Build
 
 ```bash
@@ -36,8 +38,16 @@ El archivo `public/_redirects` ya incluye la regla SPA para que el enrutamiento 
 Los productos y categorías se obtienen de:
 
 ```
-GET https://hook.us2.make.com/mou1z52pn4lq8pqwjtslfdaf6b3dpvta
-Header: x-make-apikey: DELUXEburger
+GET https://round-voice-068e.dannymariano869.workers.dev/
+```
+
+Respuesta JSON:
+
+```json
+{
+  "categorias": { "productCategories": [...] },
+  "productos": { "products": [...] }
+}
 ```
 
 ## WhatsApp

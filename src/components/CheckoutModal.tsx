@@ -3,6 +3,7 @@ import { AlertCircle, MapPin, MessageSquare, Send, X } from 'lucide-react'
 import type { CartItem, DeliveryInfo, Product } from '../types'
 import { formatPrice } from '../utils/format'
 import { buildOrderMessage, getWhatsAppUrl } from '../utils/whatsapp'
+import { QuantityControls } from './QuantityControls'
 
 interface CheckoutModalProps {
   isOpen: boolean
@@ -11,6 +12,10 @@ interface CheckoutModalProps {
   subtotal: number
   deliveryZones: Product[]
   onClearCart: () => void
+  onAddItem: (productId: number) => void
+  onRemoveItem: (productId: number) => void
+  onDeleteItem: (productId: number) => void
+  onItemCommentChange: (productId: number, comment: string) => void
 }
 
 export function CheckoutModal({
@@ -20,6 +25,10 @@ export function CheckoutModal({
   subtotal,
   deliveryZones,
   onClearCart,
+  onAddItem,
+  onRemoveItem,
+  onDeleteItem,
+  onItemCommentChange,
 }: CheckoutModalProps) {
   const [delivery, setDelivery] = useState<DeliveryInfo>({
     zone: null,
@@ -32,6 +41,10 @@ export function CheckoutModal({
   useEffect(() => {
     if (!isOpen) setTouched(false)
   }, [isOpen])
+
+  useEffect(() => {
+    if (isOpen && items.length === 0) onClose()
+  }, [isOpen, items.length, onClose])
 
   if (!isOpen) return null
 
@@ -82,18 +95,38 @@ export function CheckoutModal({
               {items.map((item) => (
                 <li
                   key={item.product.id}
-                  className="flex items-center justify-between gap-3 rounded-xl bg-deluxe-black/50 px-4 py-3"
+                  className="flex flex-col gap-3 rounded-xl bg-deluxe-black/50 px-4 py-3"
                 >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-white">{item.product.name}</p>
-                    <p className="text-sm text-deluxe-silver">
-                      {formatPrice(item.product.price)} c/u
-                    </p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-white">{item.product.name}</p>
+                      <p className="text-sm text-deluxe-silver">
+                        {formatPrice(item.product.price)} c/u ·{' '}
+                        <span className="font-semibold text-white">
+                          {formatPrice(item.product.price * item.quantity)}
+                        </span>
+                      </p>
+                    </div>
+                    <QuantityControls
+                      quantity={item.quantity}
+                      onAdd={() => onAddItem(item.product.id)}
+                      onRemove={() => onRemoveItem(item.product.id)}
+                      onDelete={() => onDeleteItem(item.product.id)}
+                      productName={item.product.name}
+                    />
                   </div>
-                  <span className="shrink-0 font-semibold text-white">x{item.quantity}</span>
-                  <span className="shrink-0 font-bold text-white">
-                    {formatPrice(item.product.price * item.quantity)}
-                  </span>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-medium text-deluxe-silver">
+                      Comentario (opcional)
+                    </label>
+                    <textarea
+                      value={item.comment}
+                      onChange={(e) => onItemCommentChange(item.product.id, e.target.value)}
+                      placeholder="Ej: Sin cebolla, extra queso..."
+                      rows={2}
+                      className="w-full resize-none rounded-lg border border-white/10 bg-deluxe-black/40 px-3 py-2 text-sm text-white placeholder:text-deluxe-silver/50 focus:border-white/30 focus:outline-none"
+                    />
+                  </div>
                 </li>
               ))}
             </ul>
@@ -169,7 +202,7 @@ export function CheckoutModal({
           <section className="mb-6">
             <label className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-deluxe-silver">
               <MessageSquare className="h-4 w-4" />
-              Comentarios adicionales
+              Comentarios generales del pedido
             </label>
             <textarea
               value={delivery.comments}

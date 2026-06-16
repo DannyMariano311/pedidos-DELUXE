@@ -1,8 +1,16 @@
 import type { MenuData, Product, ProductCategory } from '../types'
 import { DELIVERY_CATEGORY_ID } from '../types'
 
-const API_URL = 'https://hook.us2.make.com/mou1z52pn4lq8pqwjtslfdaf6b3dpvta'
-const API_KEY = 'DELUXEburger'
+const PRODUCTION_API_URL = 'https://round-voice-068e.dannymariano869.workers.dev/'
+
+const API_URL =
+  import.meta.env.VITE_API_URL ??
+  (import.meta.env.DEV ? '/api/menu' : PRODUCTION_API_URL)
+
+interface ApiResponse {
+  categorias: { productCategories: ProductCategory[] }
+  productos: { products: Product[] }
+}
 
 interface RawMenuResponse {
   categories: ProductCategory[]
@@ -10,20 +18,14 @@ interface RawMenuResponse {
   deliveryZones: Product[]
 }
 
-function parseMenuResponse(text: string): RawMenuResponse {
-  const categoriesMatch = text.match(/Categorias:\s*(\{[\s\S]*?\})\s*Productos:/i)
-  const productsMatch = text.match(/Productos:\s*(\{[\s\S]*\})/i)
-
-  if (!categoriesMatch || !productsMatch) {
+function parseMenuResponse(data: ApiResponse): RawMenuResponse {
+  if (!data.categorias?.productCategories || !data.productos?.products) {
     throw new Error('Formato de respuesta inválido')
   }
 
-  const categoriesData = JSON.parse(categoriesMatch[1]) as { productCategories: ProductCategory[] }
-  const productsData = JSON.parse(productsMatch[1]) as { products: Product[] }
+  const allProducts = data.productos.products.filter((p) => p.active)
 
-  const allProducts = productsData.products.filter((p) => p.active)
-
-  const categories = categoriesData.productCategories
+  const categories = data.categorias.productCategories
     .filter((c) => c.enableOnlineMenu && c.id !== DELIVERY_CATEGORY_ID)
     .sort((a, b) => categoryOrder(a.name) - categoryOrder(b.name))
 
@@ -48,21 +50,15 @@ function categoryOrder(name: string): number {
   return order[name] ?? 99
 }
 
-async function fetchRaw(): Promise<string> {
-  const response = await fetch(API_URL, {
-    headers: { 'x-make-apikey': API_KEY },
-  })
+export async function fetchMenuData(): Promise<RawMenuResponse> {
+  const response = await fetch(API_URL)
 
   if (!response.ok) {
     throw new Error(`Error al cargar el menú (${response.status})`)
   }
 
-  return response.text()
-}
-
-export async function fetchMenuData(): Promise<RawMenuResponse> {
-  const text = await fetchRaw()
-  return parseMenuResponse(text)
+  const data = (await response.json()) as ApiResponse
+  return parseMenuResponse(data)
 }
 
 export async function fetchMenu(): Promise<MenuData> {

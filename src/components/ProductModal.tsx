@@ -1,24 +1,31 @@
-import { Minus, Plus, X } from 'lucide-react'
+import { MessageSquare, Plus, X } from 'lucide-react'
 import type { Product } from '../types'
 import { formatPrice } from '../utils/format'
+import { QuantityControls } from './QuantityControls'
 import { ProductImage } from './ProductImage'
 
 interface ProductModalProps {
   product: Product | null
   categoryName: string
   quantity: number
+  comment: string
   onClose: () => void
   onAdd: () => void
   onRemove: () => void
+  onDelete: () => void
+  onCommentChange: (comment: string) => void
 }
 
 export function ProductModal({
   product,
   categoryName,
   quantity,
+  comment,
   onClose,
   onAdd,
   onRemove,
+  onDelete,
+  onCommentChange,
 }: ProductModalProps) {
   if (!product) return null
 
@@ -80,31 +87,36 @@ export function ProductModal({
               Sin descripción adicional.
             </p>
           )}
+
+          {inCart && (
+            <div className="mt-5">
+              <label className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-deluxe-silver">
+                <MessageSquare className="h-4 w-4" />
+                Comentario para este producto
+              </label>
+              <textarea
+                value={comment}
+                onChange={(e) => onCommentChange(e.target.value)}
+                placeholder="Ej: Sin cebolla, salsa aparte, término medio..."
+                rows={2}
+                className="w-full resize-none rounded-xl border border-white/15 bg-deluxe-black/50 px-4 py-3 text-white placeholder:text-deluxe-silver/50 focus:border-white/40 focus:outline-none"
+              />
+            </div>
+          )}
         </div>
 
         <div className="border-t border-white/10 bg-deluxe-black/60 p-5 safe-bottom sm:p-6">
           {inCart ? (
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-3">
               <span className="text-sm text-deluxe-silver">Cantidad en tu pedido</span>
-              <div className="flex items-center gap-2 rounded-full border border-white/20 bg-deluxe-charcoal px-2 py-1">
-                <button
-                  type="button"
-                  onClick={onRemove}
-                  className="flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
-                  aria-label={`Quitar ${product.name}`}
-                >
-                  <Minus className="h-5 w-5" />
-                </button>
-                <span className="min-w-[2rem] text-center text-lg font-bold">{quantity}</span>
-                <button
-                  type="button"
-                  onClick={onAdd}
-                  className="flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
-                  aria-label={`Agregar ${product.name}`}
-                >
-                  <Plus className="h-5 w-5" />
-                </button>
-              </div>
+              <QuantityControls
+                quantity={quantity}
+                onAdd={onAdd}
+                onRemove={onRemove}
+                onDelete={onDelete}
+                productName={product.name}
+                size="md"
+              />
             </div>
           ) : (
             <button

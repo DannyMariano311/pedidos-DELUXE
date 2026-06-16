@@ -12,7 +12,7 @@ export function useCart() {
           i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
         )
       }
-      return [...prev, { product, quantity: 1 }]
+      return [...prev, { product, quantity: 1, comment: '' }]
     })
   }, [])
 
@@ -29,6 +29,10 @@ export function useCart() {
     })
   }, [])
 
+  const deleteItem = useCallback((productId: number) => {
+    setItems((prev) => prev.filter((i) => i.product.id !== productId))
+  }, [])
+
   const setQuantity = useCallback((productId: number, quantity: number) => {
     if (quantity <= 0) {
       setItems((prev) => prev.filter((i) => i.product.id !== productId))
@@ -36,6 +40,12 @@ export function useCart() {
     }
     setItems((prev) =>
       prev.map((i) => (i.product.id === productId ? { ...i, quantity } : i))
+    )
+  }, [])
+
+  const setItemComment = useCallback((productId: number, comment: string) => {
+    setItems((prev) =>
+      prev.map((i) => (i.product.id === productId ? { ...i, comment } : i))
     )
   }, [])
 
@@ -56,14 +66,22 @@ export function useCart() {
     [items]
   )
 
+  const getItemComment = useCallback(
+    (productId: number) => items.find((i) => i.product.id === productId)?.comment ?? '',
+    [items]
+  )
+
   return {
     items,
     addItem,
     removeItem,
+    deleteItem,
     setQuantity,
+    setItemComment,
     clearCart,
     totalItems,
     subtotal,
     getQuantity,
+    getItemComment,
   }
 }

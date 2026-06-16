@@ -144,6 +144,7 @@ export default function App() {
                 onOpen={() => setSelectedProduct(product)}
                 onAdd={() => cart.addItem(product)}
                 onRemove={() => cart.removeItem(product.id)}
+                onDelete={() => cart.deleteItem(product.id)}
               />
             ))}
           </div>
@@ -164,9 +165,19 @@ export default function App() {
         product={selectedProduct}
         categoryName={activeCategory.name}
         quantity={selectedProduct ? cart.getQuantity(selectedProduct.id) : 0}
+        comment={selectedProduct ? cart.getItemComment(selectedProduct.id) : ''}
         onClose={() => setSelectedProduct(null)}
         onAdd={() => selectedProduct && cart.addItem(selectedProduct)}
         onRemove={() => selectedProduct && cart.removeItem(selectedProduct.id)}
+        onDelete={() => {
+          if (selectedProduct) {
+            cart.deleteItem(selectedProduct.id)
+            setSelectedProduct(null)
+          }
+        }}
+        onCommentChange={(comment) => {
+          if (selectedProduct) cart.setItemComment(selectedProduct.id, comment)
+        }}
       />
 
       <CheckoutModal
@@ -176,6 +187,13 @@ export default function App() {
         subtotal={cart.subtotal}
         deliveryZones={deliveryZones}
         onClearCart={cart.clearCart}
+        onAddItem={(id) => {
+          const product = menu.products.find((p) => p.id === id)
+          if (product) cart.addItem(product)
+        }}
+        onRemoveItem={(id) => cart.removeItem(id)}
+        onDeleteItem={(id) => cart.deleteItem(id)}
+        onItemCommentChange={(id, comment) => cart.setItemComment(id, comment)}
       />
     </div>
   )

@@ -1,7 +1,8 @@
 import type { KeyboardEvent, MouseEvent } from 'react'
-import { Minus, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import type { Product } from '../types'
 import { formatPrice } from '../utils/format'
+import { QuantityControls } from './QuantityControls'
 import { ProductImage } from './ProductImage'
 
 interface ProductCardProps {
@@ -11,6 +12,7 @@ interface ProductCardProps {
   onOpen: () => void
   onAdd: () => void
   onRemove: () => void
+  onDelete: () => void
 }
 
 export function ProductCard({
@@ -20,6 +22,7 @@ export function ProductCard({
   onOpen,
   onAdd,
   onRemove,
+  onDelete,
 }: ProductCardProps) {
   const inCart = quantity > 0
 
@@ -63,35 +66,20 @@ export function ProductCard({
         {product.description && (
           <p className="line-clamp-2 text-sm text-deluxe-silver">{product.description}</p>
         )}
-        <div className="mt-auto flex items-center justify-between gap-2 pt-2">
+        <div className="mt-auto flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:justify-between">
           <span className="text-lg font-bold text-deluxe-white">
             {formatPrice(product.price)}
           </span>
 
           {inCart ? (
-            <div
-              className="flex items-center gap-1 rounded-full border border-white/20 bg-deluxe-black"
-              onClick={stopPropagation}
-              onKeyDown={stopPropagation}
-              role="presentation"
-            >
-              <button
-                type="button"
-                onClick={onRemove}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-deluxe-white transition-colors hover:bg-white/10"
-                aria-label={`Quitar ${product.name}`}
-              >
-                <Minus className="h-4 w-4" />
-              </button>
-              <span className="min-w-[1.5rem] text-center text-sm font-semibold">{quantity}</span>
-              <button
-                type="button"
-                onClick={onAdd}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-deluxe-white transition-colors hover:bg-white/10"
-                aria-label={`Agregar ${product.name}`}
-              >
-                <Plus className="h-4 w-4" />
-              </button>
+            <div onClick={stopPropagation} onKeyDown={stopPropagation} role="presentation">
+              <QuantityControls
+                quantity={quantity}
+                onAdd={onAdd}
+                onRemove={onRemove}
+                onDelete={onDelete}
+                productName={product.name}
+              />
             </div>
           ) : (
             <button
@@ -100,7 +88,7 @@ export function ProductCard({
                 stopPropagation(e)
                 onAdd()
               }}
-              className="flex h-9 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold text-deluxe-black transition-transform hover:scale-105 active:scale-95"
+              className="flex h-9 w-fit items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold text-deluxe-black transition-transform hover:scale-105 active:scale-95"
             >
               <Plus className="h-4 w-4" />
               Agregar
