@@ -15,7 +15,7 @@ export function CartBar({ itemCount, subtotal, onOpenCheckout }: CartBarProps) {
       <button
         type="button"
         onClick={onOpenCheckout}
-        className="mx-auto flex w-full max-w-lg items-center justify-between gap-4 rounded-2xl bg-white px-5 py-4 text-deluxe-black shadow-xl transition-transform hover:scale-[1.01] active:scale-[0.99]"
+        className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 rounded-2xl bg-white px-5 py-4 text-deluxe-black shadow-xl transition-transform hover:scale-[1.01] active:scale-[0.99]"
       >
         <div className="flex items-center gap-3">
           <div className="relative">

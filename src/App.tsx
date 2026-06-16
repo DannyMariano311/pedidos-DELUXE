@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Loader2, RefreshCw, UtensilsCrossed } from 'lucide-react'
 import { CartBar } from './components/CartBar'
 import { CategoryTabs } from './components/CategoryTabs'
 import { CheckoutModal } from './components/CheckoutModal'
 import { ProductCard } from './components/ProductCard'
+import { ProductModal } from './components/ProductModal'
 import { useCart } from './hooks/useCart'
 import { fetchMenuData } from './services/api'
 import type { MenuData, Product, ProductCategory } from './types'
@@ -41,7 +42,10 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null)
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
+  const productsSectionRef = useRef<HTMLElement>(null)
+  const skipInitialScroll = useRef(true)
   const cart = useCart()
 
   async function loadMenu() {
@@ -66,6 +70,15 @@ export default function App() {
     loadMenu()
   }, [])
 
+  useEffect(() => {
+    if (skipInitialScroll.current) {
+      skipInitialScroll.current = false
+      return
+    }
+    if (activeCategoryId === null) return
+    productsSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [activeCategoryId])
+
   const activeCategory = useMemo((): ProductCategory | null => {
     if (!menu || activeCategoryId === null) return null
     return menu.categories.find((c) => c.id === activeCategoryId) ?? null
@@ -86,13 +99,13 @@ export default function App() {
   return (
     <div className="min-h-screen bg-deluxe-black text-deluxe-white">
       <header className="sticky top-0 z-30 border-b border-white/10 bg-deluxe-black/90 backdrop-blur-lg">
-        <div className="mx-auto max-w-3xl px-4 py-5">
+        <div className="mx-auto max-w-7xl px-4 py-5 lg:px-8">
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/20 bg-deluxe-charcoal">
               <UtensilsCrossed className="h-5 w-5 text-white" strokeWidth={1.75} />
             </div>
             <div>
-              <h1 className="font-display text-2xl font-bold tracking-tight">
+              <h1 className="font-display text-2xl font-bold tracking-tight lg:text-3xl">
                 DELUXE <span className="text-deluxe-silver">BURGER</span>
               </h1>
               <p className="text-sm text-deluxe-silver">Arma tu pedido y envíalo a cocina</p>
@@ -100,7 +113,7 @@ export default function App() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-3xl border-t border-white/5 px-4 py-3">
+        <div className="mx-auto max-w-7xl border-t border-white/5 px-4 py-3 lg:px-8">
           <CategoryTabs
             categories={menu.categories}
             activeId={activeCategoryId}
@@ -109,22 +122,26 @@ export default function App() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 pb-32 pt-6">
-        <div className="mb-5 flex items-center gap-3 animate-fade-in">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-deluxe-charcoal">
-            <CategoryIcon className="h-5 w-5 text-deluxe-silver" strokeWidth={1.75} />
+      <main
+        ref={productsSectionRef}
+        className="mx-auto max-w-7xl scroll-mt-36 px-4 pb-32 pt-6 lg:px-8"
+      >
+        <div className="mb-6 flex items-center gap-3 animate-fade-in">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/15 bg-deluxe-charcoal lg:h-12 lg:w-12">
+            <CategoryIcon className="h-5 w-5 text-deluxe-silver lg:h-6 lg:w-6" strokeWidth={1.75} />
           </div>
-          <h2 className="font-display text-2xl font-semibold">{activeCategory.name}</h2>
+          <h2 className="font-display text-2xl font-semibold lg:text-3xl">{activeCategory.name}</h2>
         </div>
 
         {categoryProducts.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 animate-fade-in">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 animate-fade-in">
             {categoryProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
                 categoryName={activeCategory.name}
                 quantity={cart.getQuantity(product.id)}
+                onOpen={() => setSelectedProduct(product)}
                 onAdd={() => cart.addItem(product)}
                 onRemove={() => cart.removeItem(product.id)}
               />
@@ -141,6 +158,15 @@ export default function App() {
         itemCount={cart.totalItems}
         subtotal={cart.subtotal}
         onOpenCheckout={() => setCheckoutOpen(true)}
+      />
+
+      <ProductModal
+        product={selectedProduct}
+        categoryName={activeCategory.name}
+        quantity={selectedProduct ? cart.getQuantity(selectedProduct.id) : 0}
+        onClose={() => setSelectedProduct(null)}
+        onAdd={() => selectedProduct && cart.addItem(selectedProduct)}
+        onRemove={() => selectedProduct && cart.removeItem(selectedProduct.id)}
       />
 
       <CheckoutModal

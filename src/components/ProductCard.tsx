@@ -1,3 +1,4 @@
+import type { KeyboardEvent, MouseEvent } from 'react'
 import { Minus, Plus } from 'lucide-react'
 import type { Product } from '../types'
 import { formatPrice } from '../utils/format'
@@ -7,6 +8,7 @@ interface ProductCardProps {
   product: Product
   categoryName: string
   quantity: number
+  onOpen: () => void
   onAdd: () => void
   onRemove: () => void
 }
@@ -15,14 +17,28 @@ export function ProductCard({
   product,
   categoryName,
   quantity,
+  onOpen,
   onAdd,
   onRemove,
 }: ProductCardProps) {
   const inCart = quantity > 0
 
+  function stopPropagation(e: MouseEvent | KeyboardEvent) {
+    e.stopPropagation()
+  }
+
   return (
     <article
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-200 ${
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onOpen()
+        }
+      }}
+      className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border text-left transition-all duration-200 ${
         inCart
           ? 'border-white/30 bg-deluxe-charcoal shadow-lg shadow-white/5'
           : 'border-white/10 bg-deluxe-charcoal/80 hover:border-white/20'
@@ -53,7 +69,12 @@ export function ProductCard({
           </span>
 
           {inCart ? (
-            <div className="flex items-center gap-1 rounded-full border border-white/20 bg-deluxe-black">
+            <div
+              className="flex items-center gap-1 rounded-full border border-white/20 bg-deluxe-black"
+              onClick={stopPropagation}
+              onKeyDown={stopPropagation}
+              role="presentation"
+            >
               <button
                 type="button"
                 onClick={onRemove}
@@ -75,7 +96,10 @@ export function ProductCard({
           ) : (
             <button
               type="button"
-              onClick={onAdd}
+              onClick={(e) => {
+                stopPropagation(e)
+                onAdd()
+              }}
               className="flex h-9 items-center gap-1.5 rounded-full bg-white px-4 text-sm font-semibold text-deluxe-black transition-transform hover:scale-105 active:scale-95"
             >
               <Plus className="h-4 w-4" />
