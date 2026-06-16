@@ -8,7 +8,9 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url)
 
-    if (url.pathname === '/api/menu') {
+    const path = url.pathname.replace(/\/$/, '') || '/'
+
+    if (path === '/api/menu') {
       const upstream = await fetch(MENU_API, {
         headers: { Accept: 'application/json' },
       })
