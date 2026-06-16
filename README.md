@@ -9,7 +9,7 @@ npm install
 npm run dev
 ```
 
-En desarrollo, Vite usa un proxy (`/api/menu`) hacia el Worker de menú para evitar errores de CORS en `localhost`. En producción la app llama directamente al Worker (el origen `pedidos-deluxe` ya está permitido).
+En desarrollo y producción, la app llama a `/api/menu` en el mismo dominio. El Worker de `pedidos-deluxe` reenvía esa ruta al API de menú, evitando errores de CORS.
 
 ## Build
 

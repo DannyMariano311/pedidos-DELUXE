@@ -1,11 +1,7 @@
 import type { MenuData, Product, ProductCategory } from '../types'
 import { DELIVERY_CATEGORY_ID } from '../types'
 
-const PRODUCTION_API_URL = 'https://round-voice-068e.dannymariano869.workers.dev/'
-
-const API_URL =
-  import.meta.env.VITE_API_URL ??
-  (import.meta.env.DEV ? '/api/menu' : PRODUCTION_API_URL)
+const API_URL = import.meta.env.VITE_API_URL ?? '/api/menu'
 
 interface ApiResponse {
   categorias: { productCategories: ProductCategory[] }
