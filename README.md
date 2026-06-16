@@ -23,8 +23,11 @@ El output queda en `dist/`, listo para Cloudflare Pages.
 2. Configuración de build:
    - **Build command:** `npm run build`
    - **Build output directory:** `dist`
+   - **Deploy command:** `npm run deploy` (equivale a `npx wrangler pages deploy dist`)
    - **Framework preset:** None (o Vite)
 3. Deploy
+
+La configuración de Wrangler está en `wrangler.jsonc` (no uses `wrangler.toml` en JSON).
 
 El archivo `public/_redirects` ya incluye la regla SPA para que el enrutamiento funcione correctamente.
 
