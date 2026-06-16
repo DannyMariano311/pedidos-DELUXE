@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "deploy": "wrangler pages deploy dist --project-name=deluxe-burger-menu"
+    "deploy": "wrangler pages deploy dist --project-name=pedidos-deluxe"
   },
   "dependencies": {
     "lucide-react": "^0.511.0",
