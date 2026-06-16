@@ -9,7 +9,14 @@ npm install
 npm run dev
 ```
 
-En desarrollo y producción, la app llama a `/api/menu` en el mismo dominio. El Worker de `pedidos-deluxe` reenvía esa ruta al API de menú, evitando errores de CORS.
+En desarrollo y producción, la app intenta cargar el menú en este orden:
+
+1. `/api/menu` — proxy del Worker (mismo dominio)
+2. `/menu.json` — respaldo generado en build desde el API de menú
+
+El script `prebuild` descarga el menú durante `npm run build`, así producción funciona aunque el proxy falle.
+
+**Deploy command en Cloudflare:** `npx wrangler deploy` (después de `npm run build`)
 
 ## Build
 
@@ -25,7 +32,7 @@ El output queda en `dist/`, listo para Cloudflare Pages.
 2. Configuración de build:
    - **Build command:** `npm run build`
    - **Build output directory:** `dist`
-   - **Deploy command:** `npm run deploy` (equivale a `npx wrangler pages deploy dist`)
+   - **Deploy command:** `npx wrangler deploy`
    - **Framework preset:** None (o Vite)
 3. Deploy
 

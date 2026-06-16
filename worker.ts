@@ -6,9 +6,7 @@ const MENU_API = 'https://round-voice-068e.dannymariano869.workers.dev/'
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    const url = new URL(request.url)
-
-    const path = url.pathname.replace(/\/$/, '') || '/'
+    const path = new URL(request.url).pathname.replace(/\/$/, '') || '/'
 
     if (path === '/api/menu') {
       const upstream = await fetch(MENU_API, {
@@ -26,4 +24,4 @@ export default {
 
     return env.ASSETS.fetch(request)
   },
-} satisfies ExportedHandler<Env>
+}

@@ -1,8 +1,6 @@
 import type { MenuData, Product, ProductCategory } from '../types'
 import { DELIVERY_CATEGORY_ID } from '../types'
 
-const API_URL = import.meta.env.VITE_API_URL ?? '/api/menu'
-
 interface ApiResponse {
   categorias: { productCategories: ProductCategory[] }
   productos: { products: Product[] }
@@ -13,6 +11,12 @@ interface RawMenuResponse {
   products: Product[]
   deliveryZones: Product[]
 }
+
+const MENU_SOURCES = [
+  import.meta.env.VITE_API_URL,
+  '/api/menu',
+  '/menu.json',
+].filter((url): url is string => Boolean(url))
 
 function parseMenuResponse(data: ApiResponse): RawMenuResponse {
   if (!data.categorias?.productCategories || !data.productos?.products) {
@@ -46,14 +50,27 @@ function categoryOrder(name: string): number {
   return order[name] ?? 99
 }
 
-export async function fetchMenuData(): Promise<RawMenuResponse> {
-  const response = await fetch(API_URL)
+async function fetchMenuPayload(): Promise<ApiResponse> {
+  let lastError: Error | null = null
 
-  if (!response.ok) {
-    throw new Error(`Error al cargar el menú (${response.status})`)
+  for (const url of MENU_SOURCES) {
+    try {
+      const response = await fetch(url)
+      if (!response.ok) {
+        lastError = new Error(`Error al cargar el menú desde ${url} (${response.status})`)
+        continue
+      }
+      return (await response.json()) as ApiResponse
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Error desconocido')
+    }
   }
 
-  const data = (await response.json()) as ApiResponse
+  throw lastError ?? new Error('No se pudo cargar el menú')
+}
+
+export async function fetchMenuData(): Promise<RawMenuResponse> {
+  const data = await fetchMenuPayload()
   return parseMenuResponse(data)
 }
 
