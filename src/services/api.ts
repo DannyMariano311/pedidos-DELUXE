@@ -12,11 +12,7 @@ interface RawMenuResponse {
   deliveryZones: Product[]
 }
 
-const MENU_SOURCES = [
-  import.meta.env.VITE_API_URL,
-  '/api/menu',
-  '/menu.json',
-].filter((url): url is string => Boolean(url))
+const MENU_URL = import.meta.env.VITE_API_URL ?? '/api/menu'
 
 function parseMenuResponse(data: ApiResponse): RawMenuResponse {
   if (!data.categorias?.productCategories || !data.productos?.products) {
@@ -51,22 +47,13 @@ function categoryOrder(name: string): number {
 }
 
 async function fetchMenuPayload(): Promise<ApiResponse> {
-  let lastError: Error | null = null
+  const response = await fetch(MENU_URL)
 
-  for (const url of MENU_SOURCES) {
-    try {
-      const response = await fetch(url)
-      if (!response.ok) {
-        lastError = new Error(`Error al cargar el menú desde ${url} (${response.status})`)
-        continue
-      }
-      return (await response.json()) as ApiResponse
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Error desconocido')
-    }
+  if (!response.ok) {
+    throw new Error(`Error al cargar el menú (${response.status})`)
   }
 
-  throw lastError ?? new Error('No se pudo cargar el menú')
+  return (await response.json()) as ApiResponse
 }
 
 export async function fetchMenuData(): Promise<RawMenuResponse> {

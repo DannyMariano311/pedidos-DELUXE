@@ -7,5 +7,11 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "run_worker_first": true
-  }
+  },
+  "services": [
+    {
+      "binding": "MENU_API",
+      "service": "round-voice-068e"
+    }
+  ]
 }

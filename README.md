@@ -9,12 +9,7 @@ npm install
 npm run dev
 ```
 
-En desarrollo y producción, la app intenta cargar el menú en este orden:
-
-1. `/api/menu` — proxy del Worker (mismo dominio)
-2. `/menu.json` — respaldo generado en build desde el API de menú
-
-El script `prebuild` descarga el menú durante `npm run build`, así producción funciona aunque el proxy falle.
+En desarrollo y producción, la app carga el menú desde `/api/menu`, un proxy del Worker que consulta el API de menú en tiempo real.
 
 **Deploy command en Cloudflare:** `npx wrangler deploy` (después de `npm run build`)
 

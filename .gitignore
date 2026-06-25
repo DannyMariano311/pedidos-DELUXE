@@ -1,6 +1,5 @@
 node_modules
 dist
 dist-ssr
-public/menu.json
 *.local
 .DS_Store

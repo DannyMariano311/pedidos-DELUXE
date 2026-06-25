@@ -1,17 +1,18 @@
 interface Env {
   ASSETS: Fetcher
+  MENU_API: Fetcher
 }
-
-const MENU_API = 'https://round-voice-068e.dannymariano869.workers.dev/'
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const path = new URL(request.url).pathname.replace(/\/$/, '') || '/'
 
     if (path === '/api/menu') {
-      const upstream = await fetch(MENU_API, {
-        headers: { Accept: 'application/json' },
-      })
+      const upstream = await env.MENU_API.fetch(
+        new Request('https://menu/', {
+          headers: { Accept: 'application/json' },
+        }),
+      )
 
       return new Response(upstream.body, {
         status: upstream.status,
