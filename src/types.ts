@@ -36,4 +36,4 @@ export interface DeliveryInfo {
 }
 
 export const DELIVERY_CATEGORY_ID = 14
-export const WHATSAPP_NUMBER = '573207146368'
+export const WHATSAPP_NUMBER = '573105049916'
